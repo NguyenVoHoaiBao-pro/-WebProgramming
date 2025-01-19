@@ -93,7 +93,7 @@
             <ul class="navbar-nav ml-auto">
 
                 <li class="nav-item">
-                    <a class="nav-link active" href="<%= request.getContextPath() %>/home">Trang Chủ</a>
+                    <a class="nav-link" href="<%= request.getContextPath() %>/home">Trang Chủ</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<%= request.getContextPath() %>/shop">Cửa Hàng</a>

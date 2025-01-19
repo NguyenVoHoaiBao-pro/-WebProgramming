@@ -92,7 +92,7 @@
             <ul class="navbar-nav ml-auto">
 
                 <li class="nav-item">
-                    <a class="nav-link active" href="<%= request.getContextPath() %>/home">Trang Chủ</a>
+                    <a class="nav-link" href="<%= request.getContextPath() %>/home">Trang Chủ</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<%= request.getContextPath() %>/shop">Cửa Hàng</a>
@@ -110,7 +110,7 @@
                 </li>
                 <div class="nav-item" id="nav-icons">
                     <!-- <i class="bi bi-search"></i> -->
-                    <a href="<%= request.getContextPath() %>/doanweb/html/Menu/Login.html"><i class="bi bi-person-fill"
+                    <a href="<%= request.getContextPath() %>/doanweb/html/Register.jsp"><i class="bi bi-person-fill"
                                                                                               id="user-icon"></i></a>
                     <!-- Biểu tượng giỏ hàng với số lượng sản phẩm -->
                     <a href="<%= request.getContextPath() %>/cart" class="position-relative">
@@ -226,7 +226,7 @@
 <%--                </div>--%>
 
                 <button type="submit" class="btn btn-dark">Đăng ký</button>
-                <p class="py-2 text-center">Bạn có tài khoản rồi? <a href="<%= request.getContextPath() %>/doanweb/html/Login.jsp" id="showSignUp">Đăng Nhập</a></p>
+                <p class="py-2 text-center">Bạn có tài khoản rồi? <a href="<%= request.getContextPath() %>/login" id="showSignUp">Đăng Nhập</a></p>
             </form>
         </div>
     </div>
