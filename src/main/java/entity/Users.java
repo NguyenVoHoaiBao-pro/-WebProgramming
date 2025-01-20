@@ -5,19 +5,21 @@ public class Users {
     private String username;
     private String email;
     private String password;
-    private String phone;
     private String role;
+    private String phone;
+    private String address;
 
     // Constructors
 
 
-    public Users(int id, String username, String email, String password,String phone, String role) {
+    public Users(int id, String username, String email, String password, String phone, String role, String address) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.phone = phone;
         this.role = role;
+        this.address = address;
     }
 
     public int getId() {
@@ -68,6 +70,14 @@ public class Users {
         this.phone = phone;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     // Override toString() for debugging
     @Override
     public String toString() {
@@ -76,7 +86,8 @@ public class Users {
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
+                ", address='" + address + '\'' +
+                ", role='" + role +
                 '}';
     }
 }

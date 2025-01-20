@@ -93,12 +93,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="<%= request.getContextPath() %>/contact">Liên hệ</a>
                 </li>
-                <li class="nav-item" id="admin-btn" style="display: <%=
-                    (session.getAttribute("role") != null &&
-                    (Integer.parseInt((String)session.getAttribute("role")) == 1)) ? "block" : "none"
-                    %>;">
-                    <a class="nav-link" href="<%= request.getContextPath() %>/ad">Quản trị</a>
-                </li>
+<%--                <li class="nav-item" id="admin-btn" style="display: <%=--%>
+<%--                    (session.getAttribute("role") != null &&--%>
+<%--                    (Integer.parseInt((String)session.getAttribute("role")) == 1)) ? "block" : "none"--%>
+<%--                    %>;">--%>
+<%--                    <a class="nav-link" href="<%= request.getContextPath() %>/ad">Quản trị</a>--%>
+<%--                </li>--%>
 
 
                 <div class="nav-item" id="nav-icons">

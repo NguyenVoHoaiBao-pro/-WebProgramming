@@ -8,15 +8,17 @@ import entity.Users;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import static dao.MySQLConnection.getConnection;
 
 public class dao {
     // Phương thức lấy danh sách tất cả sản phẩm
     public List<Products> getAllProducts() {
         List<Products> l = new ArrayList<>();
-        String query = "SELECT * FROM product";
+        String query = "SELECT * FROM Product";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
@@ -62,7 +64,7 @@ public class dao {
     }
 
     public static Products getLatestProduct() {
-        String query = "SELECT * FROM product ORDER BY p_id DESC LIMIT 1";
+        String query = "SELECT * FROM Product ORDER BY p_id DESC LIMIT 1";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
@@ -87,7 +89,7 @@ public class dao {
 
     public List<Products> getProductsByCategory(int category_id) {
         List<Products> l = new ArrayList<>();
-        String query = "SELECT * FROM product WHERE category_id = ?";
+        String query = "SELECT * FROM Product WHERE category_id = ?";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             // Gán giá trị của category_id vào câu truy vấn tại vị trí tham số ?
@@ -114,7 +116,7 @@ public class dao {
 
     public Products getProductById(int productId) {
         Products product = null;
-        String query = "SELECT * FROM product WHERE p_id = ?";  // Câu lệnh SQL để lấy sản phẩm theo ID
+        String query = "SELECT * FROM Product WHERE p_id = ?";  // Câu lệnh SQL để lấy sản phẩm theo ID
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -146,7 +148,7 @@ public class dao {
 
     public Products getProductByName(String productName) {
         Products product = null;
-        String query = "SELECT * FROM product WHERE name like ?";  // Câu lệnh SQL để lấy sản phẩm theo ID
+        String query = "SELECT * FROM Product WHERE name like ?";  // Câu lệnh SQL để lấy sản phẩm theo ID
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -177,8 +179,8 @@ public class dao {
     }
 
     /// ///////////////////
-    public void addProduct(String name, double price,  int stock, String description, int category_id, String image ) {
-        String sql = "INSERT INTO product (name, price, stock, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?)";
+    public void addProduct(String name, double price, int stock, String description, int category_id, String image) {
+        String sql = "INSERT INTO Product (name, price, stock, description, category_id, image) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
             stmt.setDouble(2, price);
@@ -203,8 +205,8 @@ public class dao {
     }
 
     // Sửa sản phẩm
-    public void updateProduct(int id, String name,int price,  int stock, String description,int category_id, String image ) {
-        String sql = "UPDATE product SET name=?, description=?, price=?, stock=?, image=?, category_id=? WHERE p_id=?";
+    public void updateProduct(int id, String name, int price, int stock, String description, int category_id, String image) {
+        String sql = "UPDATE Product SET name=?, description=?, price=?, stock=?, image=?, category_id=? WHERE p_id=?";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
             stmt.setDouble(2, price);
@@ -221,7 +223,7 @@ public class dao {
 
     // Xóa sản phẩm
     public void deleteProduct(int id) {
-        String sql = "DELETE FROM product WHERE p_id=?";
+        String sql = "DELETE FROM Product WHERE p_id=?";
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
@@ -242,7 +244,7 @@ public class dao {
 
     // Cập nhật số lượng tồn kho
     public int updateStock(int productId, int stock) {
-        String query = "UPDATE product SET stock = ? WHERE p_id = ?";
+        String query = "UPDATE Product SET stock = ? WHERE p_id = ?";
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -289,7 +291,7 @@ public class dao {
     }
 
     public Users login(String username, String password) {
-        String query = "SELECT * FROM user WHERE username = ? AND password = ?";
+        String query = "SELECT * FROM User WHERE username = ? AND password = ?";
         try (Connection connection = MySQLConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, username);
@@ -305,8 +307,9 @@ public class dao {
                             rs.getString("email"),
                             rs.getString("password"),
                             rs.getString("phone"),
-                            rs.getString("role")
-                    );
+                            rs.getString("role"),
+                            rs.getString("address")
+                            );
                     // Hiển thị thông tin người dùng ra console (debug)
                     System.out.println("Đăng nhập thành công! Người dùng: " + user);
                     return user;
@@ -322,7 +325,7 @@ public class dao {
     }
 
     public Users checkExist(String username) {
-        String query = "SELECT * FROM user WHERE username = ?";
+        String query = "SELECT * FROM User WHERE username = ?";
         try (Connection connection = MySQLConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -337,7 +340,8 @@ public class dao {
                             rs.getString("email"),
                             rs.getString("password"),
                             rs.getString("phone"),
-                            rs.getString("role")
+                            rs.getString("role"),
+                            rs.getString("address")
                     );
                 }
             }
@@ -351,15 +355,17 @@ public class dao {
         return null; // Trả về null nếu không tìm thấy người dùng
     }
 
-    public void Register(String username, String email, String password, String phone) {
-        String query = "INSERT INTO user (username, email, password, phone, role) VALUES (?, ?, ?, ?, 0)";
+    public void Register(String username, String email, String password, String phone, String address) {
+        String query = "INSERT INTO User (username, email, password, role, phone, address) VALUES (?, ?, ?, 0, ?, ?)";
         try (Connection connection = MySQLConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
+            // Thiết lập các tham số theo thứ tự đúng
             statement.setString(1, username);
             statement.setString(2, email);
             statement.setString(3, password);
             statement.setString(4, phone);
+            statement.setString(5, address);
 
             // Thực thi câu lệnh và kiểm tra kết quả
             int rowsAffected = statement.executeUpdate();
@@ -377,9 +383,10 @@ public class dao {
         }
     }
 
+
     public List<Products> getRandomProducts() {
         List<Products> products = new ArrayList<>();
-        String query = "SELECT * FROM product ORDER BY RAND() LIMIT 4"; // Lấy 4 sản phẩm ngẫu nhiên
+        String query = "SELECT * FROM Product ORDER BY RAND() LIMIT 4"; // Lấy 4 sản phẩm ngẫu nhiên
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(query);

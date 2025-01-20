@@ -1071,26 +1071,30 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    height: 100vh; /* Đảm bảo profile-bar chiếm toàn bộ chiều cao */
     position: relative;
+}
+
+.profile-bar .profile-header {
+    display: flex; /* Chứa avatar và thông tin */
+    flex-direction: column; /* Xếp avatar và thông tin thành cột */
+    align-items: center; /* Căn giữa các phần tử theo chiều ngang */
+    margin-bottom: 20px; /* Khoảng cách giữa avatar và các liên kết menu */
 }
 
 .profile-bar .avatar {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    margin: 0 auto;
-    display: block;
+    margin-bottom: 10px; /* Khoảng cách giữa avatar và lời chào */
 }
-
 
 .profile-bar .profile-greeting {
     font-size: 18px;
     font-weight: bold;
     text-align: center;
-    margin-left: 45px;
 }
-
 
 .profile-bar .menu-links {
     list-style: none;
@@ -1099,7 +1103,6 @@ button {
 
 .profile-bar .menu-links li {
     margin: 20px;
-
 }
 
 .profile-bar .menu-links a {
@@ -1119,7 +1122,6 @@ button {
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     align-items: center;
-
 }
 
 .profile-form h3 {
@@ -1157,6 +1159,8 @@ button {
 .profile-form .btn-profile:hover {
     background-color: #BC1F23;
 }
+
+
 
 /* Cài đặt lại kiểu button trong form */
 /* Cập nhật CSS cho nút logout */
@@ -1334,6 +1338,7 @@ button {
         font-size: 16px;
         font-weight: bold;
         margin: 0;
+        text-align: center !important;
     }
 
 }
@@ -1368,6 +1373,7 @@ button {
         font-size: 14px;
         margin-top: 8px;
         margin-bottom: 8px;
+        text-align: center !important;
     }
 
 }

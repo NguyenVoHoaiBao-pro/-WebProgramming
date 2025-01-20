@@ -214,16 +214,16 @@
                 </div>
                 <div class="form-group">
                     <label for="confirmPassword">Nhập Lại Mật Khẩu</label>
-                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Enter your confirmPassword" required>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Enter your confirm password" required>
                 </div>
                 <div class="form-group">
                     <label for="phone">Số điện thoại</label>
                     <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone" required>
                 </div>
-<%--                <div class="form-group">--%>
-<%--                    <label for="address">Địa chỉ</label>--%>
-<%--                    <input type="text" class="form-control" id="address" name="address" placeholder="Enter your address" required>--%>
-<%--                </div>--%>
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <input type="text" class="form-control" id="address" name="address" placeholder="Enter your address" required>
+                </div>
 
                 <button type="submit" class="btn btn-dark">Đăng ký</button>
                 <p class="py-2 text-center">Bạn có tài khoản rồi? <a href="<%= request.getContextPath() %>/login" id="showSignUp">Đăng Nhập</a></p>

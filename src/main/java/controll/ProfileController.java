@@ -94,21 +94,42 @@ public class ProfileController extends HttpServlet {
 
     private void handleEditProfile(HttpServletRequest request, HttpServletResponse response, Users loggedInUser)
             throws IOException, ServletException {
+        // Lấy các tham số từ request
         String newEmail = request.getParameter("newEmail");
         String newPhone = request.getParameter("newPhone");
         String newAddress = request.getParameter("newAddress");
 
-        loggedInUser.setEmail(newEmail);
+        // Kiểm tra tính hợp lệ của các tham số nhập vào
+        if (newEmail == null || newEmail.isEmpty() || !newEmail.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            request.setAttribute("errorMessage", "Email không hợp lệ.");
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
+            return;
+        }
 
+        if (newPhone == null || newPhone.isEmpty() || !newPhone.matches("^\\d{10,15}$")) {
+            request.setAttribute("errorMessage", "Số điện thoại không hợp lệ.");
+            request.getRequestDispatcher("/profile.jsp").forward(request, response);
+            return;
+        }
+
+        // Cập nhật thông tin người dùng
+        loggedInUser.setEmail(newEmail);
+        loggedInUser.setPhone(newPhone);
+        loggedInUser.setAddress(newAddress);
+
+        // Gọi phương thức dao để cập nhật thông tin người dùng
         boolean isUpdated = dao.editUser(loggedInUser);
 
         if (isUpdated) {
+            // Cập nhật session và gửi thông báo thành công
             request.getSession().setAttribute("user", loggedInUser);
             request.setAttribute("successMessage", "Cập nhật thông tin thành công!");
         } else {
+            // Gửi thông báo lỗi nếu cập nhật không thành công
             request.setAttribute("errorMessage", "Cập nhật thông tin thất bại. Vui lòng thử lại!");
         }
 
+        // Chuyển hướng về trang thông tin người dùng
         response.sendRedirect("/profile?action=changeInfo");
     }
 
