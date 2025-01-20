@@ -291,7 +291,7 @@ public class dao {
     }
 
     public Users login(String username, String password) {
-        String query = "SELECT * FROM User WHERE username = ? AND password = ?";
+        String query = "SELECT * FROM user WHERE username = ? AND password = ?";
         try (Connection connection = MySQLConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, username);
@@ -325,7 +325,7 @@ public class dao {
     }
 
     public Users checkExist(String username) {
-        String query = "SELECT * FROM User WHERE username = ?";
+        String query = "SELECT * FROM user WHERE username = ?";
         try (Connection connection = MySQLConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -356,7 +356,7 @@ public class dao {
     }
 
     public void Register(String username, String email, String password, String phone, String address) {
-        String query = "INSERT INTO User (username, email, password, role, phone, address) VALUES (?, ?, ?, 0, ?, ?)";
+        String query = "INSERT INTO user (username, email, password, role, phone, address) VALUES (?, ?, ?, 0, ?, ?)";
         try (Connection connection = MySQLConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 

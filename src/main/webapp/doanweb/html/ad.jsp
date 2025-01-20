@@ -1,6 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dao.dao, entity.Products, entity.Categories" %>
 <%@ page import="java.util.List" %>
+<%@ page import="entity.Orders" %>
+<%@ page import="entity.Users" %>
+<%@ page import="entity.CartItem" %>
+<%@ page import="java.math.BigDecimal" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -262,5 +266,39 @@
     });
 
 </script>
+<%
+    Orders order = (Orders) request.getAttribute("order");
+    Users user = (Users) request.getAttribute("user");
+    List<CartItem> cartItems = (List<CartItem>) request.getAttribute("cartItems");
+    BigDecimal totalAmount = (BigDecimal) request.getAttribute("totalAmount");
+%>
 
+<h2>Thông tin đơn hàng</h2>
+<p><strong>Người mua:</strong> ${user.username}</p>
+<p><strong>Điện thoại:</strong> ${user.phone}</p>
+<p><strong>Địa chỉ:</strong> ${user.address}</p>
+
+<h3>Sản phẩm trong đơn hàng:</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Sản phẩm</th>
+        <th>Giá</th>
+        <th>Số lượng</th>
+        <th>Tổng giá</th>
+    </tr>
+    </thead>
+    <tbody>
+    <c:forEach var="item" items="${cartItems}">
+        <tr>
+            <td>${item.product.name}</td>
+            <td>${item.product.price} K</td>
+            <td>${item.quantity}</td>
+            <td>${item.totalPrice} K</td>
+        </tr>
+    </c:forEach>
+    </tbody>
+</table>
+
+<p><strong>Tổng cộng:</strong> ${totalAmount} K</p>
 </html>

@@ -36,4 +36,19 @@ public class OrderDao {
 
         return orderList;
     }
+    public void saveOrder(Orders order) {
+        String query = "INSERT INTO orders (user_id, order_amount, order_date) VALUES (?, ?, ?)";
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, order.getUserId());
+            statement.setBigDecimal(2, order.getTotalAmount());
+            statement.setTimestamp(3, order.getOrderDate());
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
