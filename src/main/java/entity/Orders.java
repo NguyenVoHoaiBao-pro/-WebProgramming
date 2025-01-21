@@ -1,27 +1,25 @@
 package entity;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
 
 public class Orders {
-    private int orderId;
-    private int userId;
-    private BigDecimal totalAmount;
-    private Timestamp orderDate;
+    private int orderId;                 // Mã đơn hàng
+    private int userId;                  // Mã người dùng
+    private List<CartItem> cartItems;    // Danh sách sản phẩm trong giỏ hàng
+    private int totalAmount;             // Tổng giá trị đơn hàng
+    private Date orderDate;              // Ngày đặt hàng
 
-    // Constructor, getters, and setters
-
-
-    public Orders() {
-    }
-
-    public Orders(int orderId, int userId, BigDecimal totalAmount , Timestamp orderDate) {
+    // Constructor
+    public Orders(int orderId, int userId, List<CartItem> cartItems, Date orderDate) {
         this.orderId = orderId;
         this.userId = userId;
-        this.totalAmount = totalAmount;
+        this.cartItems = cartItems;
         this.orderDate = orderDate;
+        this.totalAmount = calculateTotalAmount(); // Tự động tính tổng giá trị
     }
 
+    // Getters và Setters
     public int getOrderId() {
         return orderId;
     }
@@ -38,20 +36,30 @@ public class Orders {
         this.userId = userId;
     }
 
-    public Timestamp getOrderDate() {
-        return orderDate;
+    public List<CartItem> getCartItems() {
+        return cartItems;
     }
 
-    public void setOrderDate(Timestamp orderDate) {
-        this.orderDate = orderDate;
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
+        this.totalAmount = calculateTotalAmount(); // Cập nhật tổng giá trị
     }
 
-    public BigDecimal getTotalAmount() {
+    public int getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
+    public Date getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(Date orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    // Tính tổng giá trị đơn hàng
+    private int calculateTotalAmount() {
+        return cartItems.stream().mapToInt(CartItem::getTotalPrice).sum();
     }
 
     @Override

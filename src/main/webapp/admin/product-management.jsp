@@ -1,85 +1,168 @@
-<%@ page import="java.sql.*" %>
-<%@ page import="java.util.*" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
-<html>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="dao.dao, entity.Products, entity.Categories" %>
+<%@ page import="java.util.List" %>
+<%@ page import="entity.Orders" %>
+<%@ page import="entity.Users" %>
+<%@ page import="entity.CartItem" %>
+<%@ page import="java.math.BigDecimal" %>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Quản lý sản phẩm</title>
+  <meta charset="UTF-8">
+  <title>Admin Page</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    form { margin-bottom: 20px; }
+    input, select { padding: 5px; margin: 5px 0; }
+    button { padding: 5px 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #45a049; }
+  </style>
 </head>
+
+
+
+
+
 <body>
-<h2>Quản lý sản phẩm</h2>
-<form method="post" action="ProductServlet">
-  <label for="name">Tên sản phẩm:</label>
-  <input type="text" id="name" name="name" required>
+<button id="backToTopBtn" onclick="scrollToTop()">⬆️</button>
+<style>
+  /* CSS cho nút "Lên đầu trang" */
+  #backToTopBtn {
+    position: fixed;
+    bottom: 20px; /* Cách đáy màn hình 20px */
+    right: 20px; /* Cách phải màn hình 20px */
+    z-index: 1000; /* Đặt trên các phần tử khác */
+    display: none; /* Ẩn nút ban đầu */
+    background-color: #007bff; /* Màu nền */
+    color: white; /* Màu chữ */
+    border: none; /* Xóa viền */
+    border-radius: 50%; /* Bo tròn nút */
+    padding: 10px 15px; /* Kích thước nút */
+    cursor: pointer; /* Hiển thị con trỏ */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+    font-size: 16px; /* Kích thước chữ */
+  }
 
-  <label for="description">Mô tả:</label>
-  <textarea id="description" name="description"></textarea>
+  #backToTopBtn:hover {
+    background-color: #0056b3; /* Màu khi hover */
+  }
+</style>
+<h1>Admin Quản lý sản phẩm</h1>
+<label for="searchInput"></label>
+<input
+        type="text"
+        id="searchInput"
+        placeholder="Tìm kiếm sản phẩm..."
+        oninput="searchProduct()"
+        onkeypress="handleEnter(event)"
+        style="width: 300px; padding: 5px; margin-bottom: 20px;"
+>
+<button onclick="searchProduct()" style="padding: 5px 10px; margin-left: 10px;">Tìm kiếm</button>
+  <%
+    dao daoInstance = new dao();
+    List<Products> productList = daoInstance.getAllProducts();
+    List<Categories> categoryList = daoInstance.getAllCategories();
+    String deleteProductId = request.getParameter("deleteProductId");
+    String deleteCategoryId = request.getParameter("deleteCategoryId");
 
-  <label for="price">Giá:</label>
-  <input type="number" id="price" name="price" required>
+    // Xóa sản phẩm
+    if (deleteProductId != null) {
+        daoInstance.deleteProduct(Integer.parseInt(deleteProductId));
+    }
 
-  <label for="category">Danh mục:</label>
-  <select id="category" name="category">
-    <option value="1">Thời trang</option>
-    <option value="2">Điện tử</option>
-    <option value="3">Gia dụng</option>
-  </select>
+    // Xóa danh mục
+    if (deleteCategoryId != null) {
+        daoInstance.deleteCategory(Integer.parseInt(deleteCategoryId));
+    }
+%>
 
-  <label for="brand">Thương hiệu:</label>
-  <input type="text" id="brand" name="brand">
 
-  <label for="quantity">Số lượng tồn kho:</label>
-  <input type="number" id="quantity" name="quantity">
-
+<form action="AddProduct" method="post" enctype="multipart/form-data">
+  <h3>Thêm/Sửa sản phẩm</h3>
+  <input type="hidden" name="id" placeholder="ID (chỉ nhập khi sửa)">
+  <label>
+    <input type="text" name="name" placeholder="Tên sản phẩm" required>
+  </label>
+  <label>
+    <input type="text" name="description" placeholder="Mô tả sản phẩm" required>
+  </label>
+  <label>
+    <input type="number" name="price" placeholder="Giá sản phẩm" required>
+  </label>
+  <label>
+    <input type="number" name="stock" placeholder="Số lượng tồn" required>
+  </label>
+  <label>
+    <input type="file" name="image" accept="image/*" multiple required>
+  </label>
+  <label>
+    <select name="category_id" required>
+      <option value="">Chọn danh mục</option>
+      <% for (Categories category : categoryList) { %>
+      <option value="<%= category.getId() %>"><%= category.getName() %></option>
+      <% } %>
+    </select>
+  </label>
   <button type="submit">Thêm sản phẩm</button>
 </form>
 
-<h3>Danh sách sản phẩm</h3>
-<table border="1">
+
+<!-- Hiển thị danh sách sản phẩm -->
+<table>
   <tr>
     <th>ID</th>
-    <th>Tên</th>
+    <th>Tên sản phẩm</th>
     <th>Mô tả</th>
     <th>Giá</th>
-    <th>Danh mục</th>
-    <th>Thương hiệu</th>
     <th>Số lượng</th>
+    <th>Hình ảnh</th>
+    <th>Danh mục</th>
     <th>Hành động</th>
   </tr>
-  <%
-    try {
-      Class.forName("com.mysql.cj.jdbc.Driver");
-      Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/tmdt", "root", "password");
-      Statement stmt = con.createStatement();
-      ResultSet rs = stmt.executeQuery("SELECT * FROM Products");
-
-      while (rs.next()) {
-  %>
+  <% for (Products product : productList) { %>
   <tr>
-    <td><%= rs.getInt("id") %></td>
-    <td><%= rs.getString("name") %></td>
-    <td><%= rs.getString("description") %></td>
-    <td><%= rs.getDouble("price") %></td>
-    <td><%= rs.getInt("category_id") %></td>
-    <td><%= rs.getString("brand") %></td>
-    <td><%= rs.getInt("stock") %></td>
+
+    <td><%= product.getId() %></td>
+    <td><%= product.getName() %></td>
+    <td><%= product.getDescription() %></td>
+    <td><%= product.getPrice() %></td>
+    <td><%= product.getStock() %></td>
+    <td><img src="<%= product.getImage() %>" alt="<%= product.getName() %>" style="width: 50px;"></td>
+    <td><%= product.getCategoryId() %></td>
     <td>
-      <a href="editProduct.jsp?id=<%= rs.getInt("id") %>">Sửa</a> |
-      <a href="deleteProduct?id=<%= rs.getInt("id") %>" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">Xóa</a>
+      <form action="UpdateProduct" method="post" style="display:inline;">
+        <input type="hidden" name="id" value="<%= product.getId() %>">
+        <label>
+          <input type="text" name="name" value="<%= product.getName() %>" required>
+        </label>
+        <label>
+          <input type="text" name="description" value="<%= product.getDescription() %>" required>
+        </label>
+        <label>
+          <input type="number" name="price" value="<%= product.getPrice() %>" required>
+        </label>
+        <label>
+          <input type="number" name="stock" value="<%= product.getStock() %>" required>
+        </label>
+        <label>
+          <input type="text" name="image" value="<%= product.getImage() %>" required>
+        </label>
+        <label>
+          <select name="category_id" required>
+            <% for (Categories category : categoryList) { %>
+            <option value="<%= category.getId() %>" <%= (category.getId() == product.getCategoryId()) ? "selected" : "" %>>
+              <%= category.getName() %>
+            </option>
+            <% } %>
+          </select>
+        </label><br>
+        <button type="submit">Cập nhật</button>
+      </form>
+
+      <a href="DeleteProduct?id=<%= product.getId() %>" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
     </td>
   </tr>
-  <%
-    }
-    con.close();
-  } catch (Exception e) {
-    e.printStackTrace();
-  %>
-  <tr>
-    <td colspan="8">Lỗi khi lấy dữ liệu từ cơ sở dữ liệu</td>
-  </tr>
-  <%
-    }
-  %>
+  <% } %>
 </table>
-</body>
-</html>

@@ -326,16 +326,13 @@
             <option value="card">Thanh toán bằng thẻ</option>
           </select>
         </div>
+
+
         <button class="ml-auto" onclick="handlePayment()">TIẾN HÀNH THANH TOÁN</button>
         <script type="text/javascript">
           function handlePayment() {
             // Hiển thị thông báo thanh toán thành công
             alert("Đặt hàng thành công!");
-
-            // Nếu bạn muốn gửi dữ liệu về server (ví dụ gửi form thanh toán)
-            // Bạn có thể thực hiện gửi yêu cầu AJAX hoặc gửi form ở đây
-            // Ví dụ: gửi form hoặc chuyển hướng đến servlet
-            // document.getElementById('paymentForm').submit();
           }
         </script>
 

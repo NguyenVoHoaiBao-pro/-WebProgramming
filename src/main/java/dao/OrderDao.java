@@ -22,10 +22,10 @@ public class OrderDao {
 
             while (rs.next()) {
                 Orders order = new Orders(
-                        rs.getInt("order_id"),
+                        rs.getInt("orderId"),
                         rs.getInt("user_id"),
-                        rs.getBigDecimal("order_amount"),
-                        rs.getTimestamp("order_date")
+                        rs.getInt("totalAmount"),
+                        rs.getDate("order_date")
                 );
                 orderList.add(order);
             }
