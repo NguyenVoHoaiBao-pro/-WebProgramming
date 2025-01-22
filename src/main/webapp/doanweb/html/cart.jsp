@@ -331,8 +331,48 @@
         <button class="ml-auto" onclick="handlePayment()">TIẾN HÀNH THANH TOÁN</button>
         <script type="text/javascript">
           function handlePayment() {
-            // Hiển thị thông báo thanh toán thành công
-            alert("Đặt hàng thành công!");
+            // Lấy thông tin cần gửi
+            const userId = "${sessionScope.userId}";
+            const orderDate = new Date().toISOString(); // Lấy ngày hiện tại
+            const totalAmount = ${sessionScope.totalPrice + 20}; // Tạm tính + phí ship
+            const cartItems = [];
+
+            // Lấy dữ liệu giỏ hàng từ JSP
+            <c:forEach var="item" items="${cart}">
+            cartItems.push({
+              productId: "${item.product.id}",
+              productName: "${item.product.name}",
+              price: ${item.product.price},
+              quantity: ${item.quantity},
+              totalPrice: ${item.quantity * item.product.price}
+            });
+            </c:forEach>
+
+            // Tạo JSON để gửi
+            const orderData = {
+              userId: userId,
+              orderDate: orderDate,
+              totalAmount: totalAmount,
+              cartItems: cartItems
+            };
+
+            // Gửi dữ liệu qua AJAX
+            fetch('/admin', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(orderData)
+            })
+                    .then(response => response.json())
+                    .then(data => {
+                      if (data.success) {
+                        alert("Đặt hàng thành công!");
+                      } else {
+                        alert("Đặt hàng thất bại: " + data.message);
+                      }
+                    })
+                    .catch(error => console.error('Error:', error));
           }
         </script>
 
