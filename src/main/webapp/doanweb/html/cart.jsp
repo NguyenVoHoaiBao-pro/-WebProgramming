@@ -328,52 +328,58 @@
         </div>
 
 
-        <button class="ml-auto" onclick="handlePayment()">TIẾN HÀNH THANH TOÁN</button>
-        <script type="text/javascript">
+        <button class="ml-auto" onclick="handlePayment()"  id="checkout-btn">TIẾN HÀNH THANH TOÁN</button>
+        <script>
           function handlePayment() {
-            // Lấy thông tin cần gửi
-            const userId = "${sessionScope.userId}";
-            const orderDate = new Date().toISOString(); // Lấy ngày hiện tại
-            const totalAmount = ${sessionScope.totalPrice + 20}; // Tạm tính + phí ship
+            // Lấy dữ liệu từ giỏ hàng
+            const userId = ${sessionScope.user.id}; // Lấy ID người dùng từ session
+            const totalAmount = ${sessionScope.totalPrice}; // Tổng giá từ session
             const cartItems = [];
 
-            // Lấy dữ liệu giỏ hàng từ JSP
-            <c:forEach var="item" items="${cart}">
-            cartItems.push({
-              productId: "${item.product.id}",
-              productName: "${item.product.name}",
-              price: ${item.product.price},
-              quantity: ${item.quantity},
-              totalPrice: ${item.quantity * item.product.price}
+            // Lấy dữ liệu từng sản phẩm từ bảng giỏ hàng
+            document.querySelectorAll('tbody tr').forEach(row => {
+              const productId = row.querySelector('input[name="id"]').value;
+              const quantity = row.querySelector('input[name="quantity"]').value;
+              const productName = row.querySelector('td:nth-child(2)').textContent.trim();
+              const totalPrice = row.querySelector('td:nth-child(5)').textContent.trim().replace('K', '');
+              cartItems.push({
+                productId,
+                productName,
+                quantity,
+                totalPrice
+              });
             });
-            </c:forEach>
 
-            // Tạo JSON để gửi
+            // Tạo object đơn hàng
             const orderData = {
-              userId: userId,
-              orderDate: orderDate,
-              totalAmount: totalAmount,
-              cartItems: cartItems
+              userId,
+              totalAmount,
+              cartItems
             };
 
-            // Gửi dữ liệu qua AJAX
-            fetch('/admin', {
+            // Gửi yêu cầu Ajax tới ad.jsp
+            fetch('ad.jsp', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify(orderData)
             })
-                    .then(response => response.json())
-                    .then(data => {
-                      if (data.success) {
-                        alert("Đặt hàng thành công!");
-                      } else {
-                        alert("Đặt hàng thất bại: " + data.message);
-                      }
+                    .then(response => {
+                      if (!response.ok) throw new Error('Lỗi khi gửi dữ liệu!');
+                      return response.text();
                     })
-                    .catch(error => console.error('Error:', error));
+                    .then(data => {
+                      alert('Thanh toán thành công!');
+                    })
+                    .catch(error => {
+                      console.error('Error:', error);
+                      alert('Có lỗi xảy ra khi thanh toán.');
+                    });
           }
+
+          // Gắn sự kiện cho nút
+          document.getElementById('checkout-btn').addEventListener('click', handlePayment);
         </script>
 
       </div>

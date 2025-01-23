@@ -301,4 +301,34 @@
 </table>
 
 <p><strong>Tổng cộng:</strong> ${totalAmount} K</p>
+
+<%@page import="java.util.*"%>
+<%@page import="com.google.gson.Gson"%>
+<%@page import="entity.*"%>
+
+<%
+    // Nhận dữ liệu JSON từ Ajax
+    StringBuilder sb = new StringBuilder();
+    String line;
+    while ((line = request.getReader().readLine()) != null) {
+        sb.append(line);
+    }
+
+    String jsonData = sb.toString();
+
+    // Parse JSON thành đối tượng Java
+    Gson gson = new Gson();
+    Orders order = gson.fromJson(jsonData, Orders.class);
+
+    // Xử lý lưu đơn hàng vào database
+    if (order != null) {
+        // Ghi logic lưu order vào DB tại đây
+        System.out.println("Đã nhận đơn hàng: " + order.toString());
+    }
+
+    // Phản hồi kết quả
+    response.setContentType("text/plain");
+    response.getWriter().write("success");
+%>
+
 </html>
