@@ -328,60 +328,31 @@
         </div>
 
 
-        <button class="ml-auto" onclick="handlePayment()"  id="checkout-btn">TIẾN HÀNH THANH TOÁN</button>
+        <button id="checkout-button" class="btn btn-primary">TIẾN HÀNH THANH TOÁN</button>
         <script>
-          function handlePayment() {
-            // Lấy dữ liệu từ giỏ hàng
-            const userId = ${sessionScope.user.id}; // Lấy ID người dùng từ session
-            const totalAmount = ${sessionScope.totalPrice}; // Tổng giá từ session
-            const cartItems = [];
-
-            // Lấy dữ liệu từng sản phẩm từ bảng giỏ hàng
-            document.querySelectorAll('tbody tr').forEach(row => {
-              const productId = row.querySelector('input[name="id"]').value;
-              const quantity = row.querySelector('input[name="quantity"]').value;
-              const productName = row.querySelector('td:nth-child(2)').textContent.trim();
-              const totalPrice = row.querySelector('td:nth-child(5)').textContent.trim().replace('K', '');
-              cartItems.push({
-                productId,
-                productName,
-                quantity,
-                totalPrice
-              });
-            });
-
-            // Tạo object đơn hàng
-            const orderData = {
-              userId,
-              totalAmount,
-              cartItems
-            };
-
-            // Gửi yêu cầu Ajax tới ad.jsp
-            fetch('ad.jsp', {
-              method: 'POST',
+          document.getElementById("checkout-button").addEventListener("click", function () {
+            fetch("/process-order", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(orderData)
+                "Content-Type": "application/json"
+              }
             })
                     .then(response => {
-                      if (!response.ok) throw new Error('Lỗi khi gửi dữ liệu!');
-                      return response.text();
+                      if (response.ok) return response.json();
+                      throw new Error("Failed to process order");
                     })
-                    .then(data => {
-                      alert('Thanh toán thành công!');
+                    .then(order => {
+                      console.log("Order sent to admin:", order);
+                      alert("Order processed successfully!");
+                      window.location.href = "/admin-page"; // Redirect to admin page
                     })
                     .catch(error => {
-                      console.error('Error:', error);
-                      alert('Có lỗi xảy ra khi thanh toán.');
+                      console.error(error);
+                      alert("Failed to process order. Try again.");
                     });
-          }
+          });
 
-          // Gắn sự kiện cho nút
-          document.getElementById('checkout-btn').addEventListener('click', handlePayment);
         </script>
-
       </div>
     </div>
   </div>
@@ -453,6 +424,48 @@
   </div>
 
 </footer>
+<body>
+<h1>Place an Order</h1>
+<form id="orderForm">
+  <label>
+    Name: <input type="text" id="name" required>
+  </label><br>
+  <label>
+    Address: <input type="text" id="address" required>
+  </label><br>
+  <label>
+    Product ID: <input type="text" id="productId" required>
+  </label><br>
+  <label>
+    Quantity: <input type="number" id="quantity" required>
+  </label><br>
+  <button type="submit">Submit Order</button>
+</form>
+
+<script>
+  const form = document.getElementById('orderForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const order = {
+      name: document.getElementById('name').value,
+      address: document.getElementById('address').value,
+      productId: document.getElementById('productId').value,
+      quantity: document.getElementById('quantity').value,
+    };
+
+    // Gửi dữ liệu JSON đến Servlet
+    const response = await fetch('http://localhost:8080/OrderServlet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order),
+    });
+
+    const result = await response.json();
+    alert(`Order submitted! Order ID: ${result.orderId}`);
+  });
+</script>
+</body>
 <!-- bootstarp cdn -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"

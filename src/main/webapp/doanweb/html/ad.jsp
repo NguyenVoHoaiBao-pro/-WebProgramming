@@ -266,69 +266,6 @@
     });
 
 </script>
-<%
-    Orders order = (Orders) request.getAttribute("order");
-    Users user = (Users) request.getAttribute("user");
-    List<CartItem> cartItems = (List<CartItem>) request.getAttribute("cartItems");
-    BigDecimal totalAmount = (BigDecimal) request.getAttribute("totalAmount");
-%>
 
-<h2>Thông tin đơn hàng</h2>
-<p><strong>Người mua:</strong> ${user.username}</p>
-<p><strong>Điện thoại:</strong> ${user.phone}</p>
-<p><strong>Địa chỉ:</strong> ${user.address}</p>
-
-<h3>Sản phẩm trong đơn hàng:</h3>
-<table border="1">
-    <thead>
-    <tr>
-        <th>Sản phẩm</th>
-        <th>Giá</th>
-        <th>Số lượng</th>
-        <th>Tổng giá</th>
-    </tr>
-    </thead>
-    <tbody>
-    <c:forEach var="item" items="${cartItems}">
-        <tr>
-            <td>${item.product.name}</td>
-            <td>${item.product.price} K</td>
-            <td>${item.quantity}</td>
-            <td>${item.totalPrice} K</td>
-        </tr>
-    </c:forEach>
-    </tbody>
-</table>
-
-<p><strong>Tổng cộng:</strong> ${totalAmount} K</p>
-
-<%@page import="java.util.*"%>
-<%@page import="com.google.gson.Gson"%>
-<%@page import="entity.*"%>
-
-<%
-    // Nhận dữ liệu JSON từ Ajax
-    StringBuilder sb = new StringBuilder();
-    String line;
-    while ((line = request.getReader().readLine()) != null) {
-        sb.append(line);
-    }
-
-    String jsonData = sb.toString();
-
-    // Parse JSON thành đối tượng Java
-    Gson gson = new Gson();
-    Orders order = gson.fromJson(jsonData, Orders.class);
-
-    // Xử lý lưu đơn hàng vào database
-    if (order != null) {
-        // Ghi logic lưu order vào DB tại đây
-        System.out.println("Đã nhận đơn hàng: " + order.toString());
-    }
-
-    // Phản hồi kết quả
-    response.setContentType("text/plain");
-    response.getWriter().write("success");
-%>
 
 </html>
