@@ -2,10 +2,11 @@ package dao;
 
 import entity.CartItem;
 import entity.Orders;
+import entity.Products;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrderDao {
     private Connection connection;
@@ -45,5 +46,50 @@ public class OrderDao {
             }
         }
         return false;
+    }
+    // Lấy tất cả đơn hàng
+    public List<Orders> getAllOrders() throws SQLException {
+        List<Orders> orders = new ArrayList<>();
+        String orderSQL = "SELECT * FROM orders";
+        String cartItemSQL = "SELECT * FROM cart_items WHERE Order_ID = ?";
+
+        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL);
+             ResultSet orderRs = orderStmt.executeQuery()) {
+
+            // Duyệt qua tất cả các đơn hàng
+            while (orderRs.next()) {
+                int orderId = orderRs.getInt("Order_ID");
+                int userId = orderRs.getInt("User_ID");
+                int totalAmount = orderRs.getInt("total_amount");
+                Timestamp orderDate = orderRs.getTimestamp("order_date");
+
+                // Tạo đối tượng Order và thêm vào danh sách
+                Orders order = new Orders(orderId, userId, totalAmount, orderDate);
+
+                // Lấy các cart items tương ứng với đơn hàng
+                try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
+                    cartItemStmt.setInt(1, orderId);
+                    try (ResultSet cartItemRs = cartItemStmt.executeQuery()) {
+                        List<CartItem> cartItems = new ArrayList<>();
+
+                        while (cartItemRs.next()) {
+                            int productId = cartItemRs.getInt("P_ID");
+                            int quantity = cartItemRs.getInt("quantity");
+                            int totalPrice = cartItemRs.getInt("total_price");
+
+                            // Tạo đối tượng CartItem và thêm vào danh sách
+                            Products product = new Products(productId); // Giả sử Product chỉ cần ID, bạn có thể thêm chi tiết sản phẩm nếu cần
+                            CartItem cartItem = new CartItem(product, quantity);
+                            cartItems.add(cartItem);
+                        }
+
+                        order.setCartItems(cartItems); // Thiết lập cart items cho đơn hàng
+                    }
+                }
+
+                orders.add(order); // Thêm đơn hàng vào danh sách
+            }
+        }
+        return orders;
     }
 }

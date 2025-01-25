@@ -344,7 +344,7 @@
                     .then(order => {
                       console.log("Order sent to admin:", order);
                       alert("Order processed successfully!");
-                      window.location.href = "/admin-page"; // Redirect to admin page
+                      window.location.href = "/home"; // Redirect to admin page
                     })
                     .catch(error => {
                       console.error(error);

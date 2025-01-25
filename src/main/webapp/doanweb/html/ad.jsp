@@ -5,6 +5,29 @@
 <%@ page import="entity.Users" %>
 <%@ page import="entity.CartItem" %>
 <%@ page import="java.math.BigDecimal" %>
+<%@ page import="dao.OrderDao" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.sql.DriverManager" %>
+<%
+    // Kết nối cơ sở dữ liệu
+    String dbURL = "jdbc:mysql://localhost:3306/ecommerce_db";
+    String dbUser = "root";
+    String dbPassword = "12345";
+
+    Connection conn = null;
+    List<Orders> orders = null;
+
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        conn = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+
+        // Lấy dữ liệu từ OrdersDAO
+        OrderDao ordersDAO = new OrderDao(conn);
+        orders = ordersDAO.getAllOrders();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -191,6 +214,67 @@
             <a href="DeleteCategory?id=<%= category.getId() %>" onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">Xóa</a>        </td>
     </tr>
     <% } %>
+</table>
+
+
+<h1>Quản lý Đơn hàng</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Mã Đơn</th>
+        <th>ID Người dùng</th>
+        <th>Ngày đặt</th>
+        <th>Tổng tiền</th>
+        <th>Chi tiết giỏ hàng</th>
+    </tr>
+    </thead>
+    <tbody>
+    <%
+        if (orders != null && !orders.isEmpty()) {
+            for (Orders  order : orders) {
+    %>
+    <tr>
+        <td><%= order.getOrderId() %></td>
+        <td><%= order.getUserId() %></td>
+        <td><%= order.getOrderDate() %></td>
+        <td><%= order.getTotalAmount() %></td>
+        <td>
+            <table>
+                <thead>
+                <tr>
+                    <th>Mã sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <%
+                    for (CartItem cartItem : order.getCartItems()) {
+                %>
+                <tr>
+                    <td><%= cartItem.getProduct() %></td>
+                    <td><%= cartItem.getQuantity() %></td>
+                    <td><%= cartItem.getTotalPrice() %></td>
+                </tr>
+                <%
+                    }
+                %>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <%
+        }
+    } else {
+    %>
+    <tr>
+        <td colspan="5">Không có đơn hàng nào</td>
+    </tr>
+    <%
+        }
+    %>
+    </tbody>
 </table>
 </body>
 

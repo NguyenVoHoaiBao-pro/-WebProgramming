@@ -9,12 +9,18 @@ public class Orders {
     private List<CartItem> cartItems;    // Danh sách sản phẩm trong giỏ hàng
     private int totalAmount;             // Tổng giá trị đơn hàng
     private Date orderDate;              // Ngày đặt hàng
-
-    // Constructor
     public Orders(int orderId, int userId, List<CartItem> cartItems, Date orderDate) {
         this.orderId = orderId;
         this.userId = userId;
         this.cartItems = cartItems;
+        this.orderDate = orderDate;
+        this.totalAmount = calculateTotalAmount(); // Tự động tính tổng giá trị
+    }
+
+    // Constructor
+    public Orders(int orderId, int userId, int cartItems, Date orderDate) {
+        this.orderId = orderId;
+        this.userId = userId;
         this.orderDate = orderDate;
         this.totalAmount = calculateTotalAmount(); // Tự động tính tổng giá trị
     }

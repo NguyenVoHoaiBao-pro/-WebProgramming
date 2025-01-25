@@ -13,7 +13,11 @@ public class Products {
     private int category_id; // Tham chiếu đến Category
     // Constructor
 
-    public Products(int id, String name,int price,  int stock, String description,int category_id, String image ) {
+    public Products(int id) {
+        this.id = id;
+    }
+
+    public Products(int id, String name, int price, int stock, String description, int category_id, String image ) {
         this.id = id;
         this.name = name;
         this.description = description;
