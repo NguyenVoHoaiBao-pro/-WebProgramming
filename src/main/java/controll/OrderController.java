@@ -64,4 +64,38 @@ public class OrderController extends HttpServlet {
             resp.getWriter().write("Error processing order: " + e.getMessage());
         }
     }
+    import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import java.util.*;
+
+    public class OrderServlet extends HttpServlet {
+        @Override
+        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+            // Lấy giỏ hàng từ session
+            HttpSession session = request.getSession();
+            List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
+            int userId = (int) session.getAttribute("userId"); // ID người dùng (lấy từ session login)
+
+            if (cart != null && !cart.isEmpty()) {
+                int totalAmount = cart.stream().mapToInt(CartItem::getTotalPrice).sum();
+                Date orderDate = new Date();
+
+                // Lưu đơn hàng vào database
+                Orders order = new Orders(0, userId, cart, totalAmount, orderDate);
+                boolean success = OrderDAO.saveOrder(order);
+
+                if (success) {
+                    // Xóa giỏ hàng sau khi đặt hàng thành công
+                    session.removeAttribute("cart");
+                    response.sendRedirect("cart.jsp?message=Order placed successfully!");
+                } else {
+                    response.sendRedirect("cart.jsp?error=Failed to place order!");
+                }
+            } else {
+                response.sendRedirect("cart.jsp?error=Cart is empty!");
+            }
+        }
+    }
+
 }
