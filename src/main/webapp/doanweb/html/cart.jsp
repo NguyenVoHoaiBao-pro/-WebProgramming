@@ -344,7 +344,7 @@
                     .then(order => {
                       console.log("Order sent to admin:", order);
                       alert("Order processed successfully!");
-                      window.location.href = "/home"; // Redirect to admin page
+                      window.location.href = "/path/to/ad.jsp"; // Chuyển đến ad.jsp
                     })
                     .catch(error => {
                       console.error(error);
@@ -442,29 +442,6 @@
   <button type="submit">Submit Order</button>
 </form>
 
-<script>
-  const form = document.getElementById('orderForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const order = {
-      name: document.getElementById('name').value,
-      address: document.getElementById('address').value,
-      productId: document.getElementById('productId').value,
-      quantity: document.getElementById('quantity').value,
-    };
-
-    // Gửi dữ liệu JSON đến Servlet
-    const response = await fetch('http://localhost:8080/OrderServlet', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(order),
-    });
-
-    const result = await response.json();
-    alert(`Order submitted! Order ID: ${result.orderId}`);
-  });
-</script>
 </body>
 <!-- bootstarp cdn -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"

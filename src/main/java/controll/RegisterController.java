@@ -60,7 +60,7 @@ public class RegisterController extends HttpServlet {
                 // Đăng ký người dùng mới
                 d.Register(username, email, hashedPassword, phone, address);
                 request.setAttribute("success", "Registration successful!");
-                response.sendRedirect("doanweb/html/Login.jsp"); // Chuyển hướng đến trang chính sau khi đăng ký
+                response.sendRedirect("doanweb/html/index.jsp"); // Chuyển hướng đến trang chính sau khi đăng ký
             } catch (Exception e) {
                 // Ghi log ngoại lệ và thông báo lỗi cho người dùng
                 LOGGER.log(Level.SEVERE, "Error during registration", e);
