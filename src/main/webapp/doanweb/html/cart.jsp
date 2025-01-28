@@ -358,6 +358,7 @@
   </div>
 </section>
 </body>
+<br><br><br><br><br><br><br><br>
 <footer class="mt-5 p-5 bg-dark">
   <div class="row conatiner mx-auto pt-5">
     <div class="footer-one col-lg-3 col-md-6 col-12">
@@ -372,11 +373,11 @@
     <div class="footer-one col-lg-3 col-md-6 col-12 mb-3">
       <h5 class="pb-2">Liên kết nhanh</h5>
       <ul class="text-uppercase list-unstyled">
-        <li><a href="index.html">trang chủ</a></li>
-        <li><a href="/html/Menu/shop.html">Cửa hàng</a></li>
-        <li><a href="/html/Menu/AboutUs.html">thông tin</a></li>
-        <li><a href="/html/Menu/ContactUs.html">liên hệ</a></li>
-        <li><a href="/html/Menu/Cart.html">Giỏ hàng</a></li>
+        <li><a href="<%= request.getContextPath() %>/home">trang chủ</a></li>
+        <li><a href="<%= request.getContextPath() %>/shop">Cửa hàng</a></li>
+        <li><a href="<%= request.getContextPath() %>/about">thông tin</a></li>
+        <li><a href="<%= request.getContextPath() %>/contact">liên hệ</a></li>
+        <li><a href="<%= request.getContextPath() %>/cart">Giỏ hàng</a></li>
       </ul>
     </div>
     <div class="footer-one col-lg-3 col-md-6 col-12 mb-3">
@@ -409,6 +410,10 @@
     </div>
     <div class="copyright mt-5">
       <div class="row container mx-auto">
+        <!-- <div class="col-lg-3 col-md-6 col-12 mb-4">
+          <img src="img/payment.png" alt="payment..logo">
+        </div> -->
+
         <div class="col-lg-6 col-md-8 col-12 mb-2 mx-auto">
           <p>MARSSTORE WEBSITE &copy; DESIGN 2024</p>
         </div>
@@ -424,25 +429,6 @@
   </div>
 
 </footer>
-<body>
-<h1>Place an Order</h1>
-<form id="orderForm">
-  <label>
-    Name: <input type="text" id="name" required>
-  </label><br>
-  <label>
-    Address: <input type="text" id="address" required>
-  </label><br>
-  <label>
-    Product ID: <input type="text" id="productId" required>
-  </label><br>
-  <label>
-    Quantity: <input type="number" id="quantity" required>
-  </label><br>
-  <button type="submit">Submit Order</button>
-</form>
-
-</body>
 <!-- bootstarp cdn -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"

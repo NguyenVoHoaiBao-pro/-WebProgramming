@@ -92,4 +92,78 @@ public class OrderDao {
         }
         return orders;
     }
+    public Orders getOrderById(int orderId) throws SQLException {
+        String orderSQL = "SELECT * FROM orders WHERE Order_ID = ?";
+        String cartItemSQL = "SELECT * FROM cart_items WHERE Order_ID = ?";
+
+        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL)) {
+            orderStmt.setInt(1, orderId);
+            try (ResultSet orderRs = orderStmt.executeQuery()) {
+                if (orderRs.next()) {
+                    int userId = orderRs.getInt("User_ID");
+                    int totalAmount = orderRs.getInt("total_amount");
+                    Timestamp orderDate = orderRs.getTimestamp("order_date");
+
+                    Orders order = new Orders(orderId, userId, totalAmount, orderDate);
+
+                    try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
+                        cartItemStmt.setInt(1, orderId);
+                        try (ResultSet cartItemRs = cartItemStmt.executeQuery()) {
+                            List<CartItem> cartItems = new ArrayList<>();
+                            while (cartItemRs.next()) {
+                                int productId = cartItemRs.getInt("P_ID");
+                                int quantity = cartItemRs.getInt("quantity");
+                                int totalPrice = cartItemRs.getInt("total_price");
+
+                                Products product = new Products(productId); // Chỉ sử dụng ID, hoặc thêm chi tiết nếu cần
+                                CartItem cartItem = new CartItem(product, quantity);
+                                cartItems.add(cartItem);
+                            }
+                            order.setCartItems(cartItems);
+                        }
+                    }
+                    return order;
+                }
+            }
+        }
+        return null; // Không tìm thấy đơn hàng
+    }
+    public List<Orders> getOrdersByUserId(int userId) throws SQLException {
+        List<Orders> orders = new ArrayList<>();
+        String orderSQL = "SELECT * FROM orders WHERE User_ID = ?";
+        String cartItemSQL = "SELECT * FROM cart_items WHERE Order_ID = ?";
+
+        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL)) {
+            orderStmt.setInt(1, userId);
+            try (ResultSet orderRs = orderStmt.executeQuery()) {
+                while (orderRs.next()) {
+                    int orderId = orderRs.getInt("Order_ID");
+                    int totalAmount = orderRs.getInt("total_amount");
+                    Timestamp orderDate = orderRs.getTimestamp("order_date");
+
+                    Orders order = new Orders(orderId, userId, totalAmount, orderDate);
+
+                    try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
+                        cartItemStmt.setInt(1, orderId);
+                        try (ResultSet cartItemRs = cartItemStmt.executeQuery()) {
+                            List<CartItem> cartItems = new ArrayList<>();
+                            while (cartItemRs.next()) {
+                                int productId = cartItemRs.getInt("P_ID");
+                                int quantity = cartItemRs.getInt("quantity");
+                                int totalPrice = cartItemRs.getInt("total_price");
+
+                                Products product = new Products(productId);
+                                CartItem cartItem = new CartItem(product, quantity);
+                                cartItems.add(cartItem);
+                            }
+                            order.setCartItems(cartItems);
+                        }
+                    }
+                    orders.add(order);
+                }
+            }
+        }
+        return orders;
+    }
+
 }
