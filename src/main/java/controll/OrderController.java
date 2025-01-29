@@ -64,5 +64,22 @@ public class OrderController extends HttpServlet {
             resp.getWriter().write("Error processing order: " + e.getMessage());
         }
     }
+    public String processOrder(Users user, List<CartItem> cart) throws Exception {
+        if (user == null) {
+            throw new Exception("User not logged in");
+        }
+        if (cart == null || cart.isEmpty()) {
+            throw new Exception("Cart is empty");
+        }
 
+        Orders order = new Orders(0, user.getId(), cart, new Date());
+        try (Connection connection = MySQLConnection.getConnection()) {
+            OrderDao orderDao = new OrderDao(connection);
+            boolean isSaved = orderDao.saveOrder(order);
+            if (!isSaved) {
+                throw new Exception("Failed to save order");
+            }
+            return new Gson().toJson(order);
+        }
+    }
 }
