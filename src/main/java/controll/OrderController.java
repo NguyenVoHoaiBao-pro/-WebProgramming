@@ -17,6 +17,8 @@ import entity.Categories;
 import java.sql.Connection;
 import dao.MySQLConnection;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -64,22 +66,47 @@ public class OrderController extends HttpServlet {
             resp.getWriter().write("Error processing order: " + e.getMessage());
         }
     }
-    public String processOrder(Users user, List<CartItem> cart) throws Exception {
-        if (user == null) {
-            throw new Exception("User not logged in");
-        }
-        if (cart == null || cart.isEmpty()) {
-            throw new Exception("Cart is empty");
-        }
+    public List<Orders> getOrdersByStatus(String status) throws SQLException {
+        List<Orders> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE status = ?";
 
-        Orders order = new Orders(0, user.getId(), cart, new Date());
-        try (Connection connection = MySQLConnection.getConnection()) {
-            OrderDao orderDao = new OrderDao(connection);
-            boolean isSaved = orderDao.saveOrder(order);
-            if (!isSaved) {
-                throw new Exception("Failed to save order");
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Orders order = new Orders(
+                            rs.getInt("Order_ID"),
+                            rs.getInt("User_ID"),
+                            rs.getInt("total_amount"),
+                            rs.getTimestamp("order_date"),
+                            status
+                    );
+                    orders.add(order);
+                }
             }
-            return new Gson().toJson(order);
         }
+        return orders;
     }
+    public List<Orders> getOrdersByStatus(String status) throws SQLException {
+        List<Orders> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE status = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Orders order = new Orders(
+                            rs.getInt("Order_ID"),
+                            rs.getInt("User_ID"),
+                            rs.getInt("total_amount"),
+                            rs.getTimestamp("order_date"),
+                            status
+                    );
+                    orders.add(order);
+                }
+            }
+        }
+        return orders;
+    }
+
 }
