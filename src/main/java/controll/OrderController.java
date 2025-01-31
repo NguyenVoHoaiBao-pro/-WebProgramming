@@ -17,8 +17,6 @@ import entity.Categories;
 import java.sql.Connection;
 import dao.MySQLConnection;
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,48 +63,6 @@ public class OrderController extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("Error processing order: " + e.getMessage());
         }
-    }
-    public List<Orders> getOrdersByStatus(String status) throws SQLException {
-        List<Orders> orders = new ArrayList<>();
-        String sql = "SELECT * FROM orders WHERE status = ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, status);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Orders order = new Orders(
-                            rs.getInt("Order_ID"),
-                            rs.getInt("User_ID"),
-                            rs.getInt("total_amount"),
-                            rs.getTimestamp("order_date"),
-                            status
-                    );
-                    orders.add(order);
-                }
-            }
-        }
-        return orders;
-    }
-    public List<Orders> getOrdersByStatus(String status) throws SQLException {
-        List<Orders> orders = new ArrayList<>();
-        String sql = "SELECT * FROM orders WHERE status = ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, status);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Orders order = new Orders(
-                            rs.getInt("Order_ID"),
-                            rs.getInt("User_ID"),
-                            rs.getInt("total_amount"),
-                            rs.getTimestamp("order_date"),
-                            status
-                    );
-                    orders.add(order);
-                }
-            }
-        }
-        return orders;
     }
 
 }
