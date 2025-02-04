@@ -47,54 +47,8 @@ public class OrderDao {
         }
         return false;
     }
-    // Cập nhật trạng thái đơn hàng
-    public void updateOrderStatus(int orderId, String status) throws SQLException {
-        String query = "UPDATE orders SET order_status = ? WHERE order_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, status);
-            stmt.setInt(2, orderId);
-            stmt.executeUpdate();
-        }
-    }
 
     // Lấy tất cả đơn hàng với trạng thái 'Pending'
-    public List<Order> getPendingOrders() throws SQLException {
-        List<Order> orders = new ArrayList<>();
-        String query = "SELECT * FROM orders WHERE order_status = 'Pending'";
-        try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-            while (rs.next()) {
-                int orderId = rs.getInt("order_id");
-                int userId = rs.getInt("user_id");
-                String orderStatus = rs.getString("order_status");
-                Timestamp orderDate = rs.getTimestamp("order_date");
-                // Tạo danh sách orderItems cho đơn hàng
-                List<OrderItem> orderItems = getOrderItems(orderId);
-                Order order = new Order(orderId, userId, orderStatus, orderDate, orderItems);
-                orders.add(order);
-            }
-        }
-        return orders;
-    }
-
-    // Lấy các sản phẩm trong đơn hàng (order_items)
-    private List<OrderItem> getOrderItems(int orderId) throws SQLException {
-        List<OrderItem> orderItems = new ArrayList<>();
-        String query = "SELECT * FROM order_items WHERE order_id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, orderId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                int productId = rs.getInt("product_id");
-                int quantity = rs.getInt("quantity");
-                // Giả sử đã có ProductDAO để lấy thông tin sản phẩm
-                Product product = new ProductDAO(conn).getProductById(productId);
-                orderItems.add(new OrderItem(0, null, product, quantity));  // orderItemId = 0 vì chưa có trong db
-            }
-        }
-        return orderItems;
-    }
-    // Lấy tất cả đơn hàng
     public List<Orders> getAllOrders() throws SQLException {
         List<Orders> orders = new ArrayList<>();
         String orderSQL = "SELECT * FROM orders";
@@ -206,6 +160,41 @@ public class OrderDao {
                             order.setCartItems(cartItems);
                         }
                     }
+                    orders.add(order);
+                }
+            }
+        }
+        return orders;
+    }
+    public boolean deleteOrder(int orderId) throws SQLException {
+        String deleteCartItems = "DELETE FROM cart_items WHERE Order_ID = ?";
+        String deleteOrder = "DELETE FROM orders WHERE Order_ID = ?";
+
+        try (PreparedStatement stmt1 = connection.prepareStatement(deleteCartItems);
+             PreparedStatement stmt2 = connection.prepareStatement(deleteOrder)) {
+            stmt1.setInt(1, orderId);
+            stmt1.executeUpdate();
+
+            stmt2.setInt(1, orderId);
+            return stmt2.executeUpdate() > 0;
+        }
+    }
+    public List<Orders> getOrdersByDateRange(Date startDate, Date endDate) throws SQLException {
+        List<Orders> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE order_date BETWEEN ? AND ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setDate(1, new java.sql.Date(startDate.getTime()));
+            stmt.setDate(2, new java.sql.Date(endDate.getTime()));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int orderId = rs.getInt("Order_ID");
+                    int userId = rs.getInt("User_ID");
+                    int totalAmount = rs.getInt("total_amount");
+                    Timestamp orderDate = rs.getTimestamp("order_date");
+
+                    Orders order = new Orders(orderId, userId, totalAmount, orderDate);
                     orders.add(order);
                 }
             }
