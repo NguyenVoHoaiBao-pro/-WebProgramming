@@ -2,67 +2,52 @@ package controll;
 
 import com.google.gson.Gson;
 import dao.OrderDao;
-import entity.CartItem;
 import entity.Orders;
 import entity.Users;
 import entity.CartItem;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import dao.dao ;
-import entity.Products;
-import entity.Categories;
-import java.sql.Connection;
-import dao.MySQLConnection;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-@WebServlet("/process-order")
+@WebServlet("/processOrder") // Định tuyến servlet đến đường dẫn /processOrder
 public class OrderController extends HttpServlet {
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // Lấy user từ session
-        Users user = (Users) req.getSession().getAttribute("user");
-        if (user == null) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resp.getWriter().write("User not logged in");
-            return;
-        }
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cart");
+        Users user = (Users) session.getAttribute("user");
 
-        // Lấy cart từ session
-        List<CartItem> cart = (List<CartItem>) req.getSession().getAttribute("cart");
-        if (cart == null || cart.isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().write("Cart is empty");
+        if (cartItems == null || user == null) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"error\": \"Giỏ hàng hoặc thông tin người dùng không hợp lệ\"}");
             return;
         }
 
         // Tạo đơn hàng
-        Orders order = new Orders(0, user.getId(), cart, new Date());
-        try (var connection = MySQLConnection.getConnection()) {
-            OrderDao orderDao = new OrderDao(connection);
-            boolean isSaved = orderDao.saveOrder(order);
+        Orders order = new Orders(0, user.getId(), cartItems, new java.util.Date());
 
-            if (isSaved) {
-                // Chuyển đơn hàng sang JSON để gửi đến admin
-                String orderJson = new Gson().toJson(order);
-                resp.setContentType("application/json");
-                resp.getWriter().write(orderJson);
-            } else {
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                resp.getWriter().write("Failed to save order");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().write("Error processing order: " + e.getMessage());
+        // Lưu đơn hàng vào DB
+        OrderDao orderDao = new OrderDao();
+        boolean isOrderSaved = orderDao.saveOrder(order);
+
+        // Phản hồi về client
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        if (isOrderSaved) {
+            Gson gson = new Gson();
+            String orderJson = gson.toJson(order);
+            String userJson = gson.toJson(user);
+            response.getWriter().write("{\"order\": " + orderJson + ", \"user\": " + userJson + "}");
+        } else {
+            response.getWriter().write("{\"error\": \"Không thể lưu đơn hàng\"}");
         }
     }
-
 }

@@ -326,9 +326,11 @@
             <option value="card">Thanh toán bằng thẻ</option>
           </select>
         </div>
+        <form action="processOrder" method="post">
+          <button type="submit" id="checkout-button" class="btn btn-primary">TIẾN HÀNH THANH TOÁN</button>
+        </form>
 
 
-        <button id="checkout-button" class="btn btn-primary">TIẾN HÀNH THANH TOÁN</button>
         <script>
           document.getElementById("checkout-button").addEventListener("click", function () {
             fetch("/process-order", {

@@ -1,205 +1,49 @@
 package dao;
 
-import entity.CartItem;
 import entity.Orders;
-import entity.Products;
+import entity.CartItem;
+import com.google.gson.Gson;
 
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 public class OrderDao {
-    private Connection connection;
+    private static final String INSERT_ORDER_SQL = "INSERT INTO orders (User_ID, total_amount, order_date) VALUES (?, ?, ?)";
+    private static final String INSERT_CART_ITEM_SQL = "INSERT INTO cart_items (Order_ID, P_ID, quantity, total_price) VALUES (?, ?, ?, ?)";
 
-    public OrderDao(Connection connection) {
-        this.connection = connection;
-    }
+    // Method to save an order and its cart items into the database
+    public boolean saveOrder(Orders order) {
+        try (Connection connection = MySQLConnection.getConnection()) {
+            // Begin transaction
+            connection.setAutoCommit(false);
 
-    public boolean saveOrder(Orders order) throws SQLException {
-        String orderSQL = "INSERT INTO orders (User_ID, total_amount, order_date) VALUES (?, ?, ?)";
-        String cartItemSQL = "INSERT INTO cart_items (Order_ID, P_ID, quantity, total_price) VALUES (?, ?, ?, ?)";
-
-        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            // Insert order
-            orderStmt.setInt(1, order.getUserId());
-            orderStmt.setInt(2, order.getTotalAmount());
-            orderStmt.setTimestamp(3, new java.sql.Timestamp(order.getOrderDate().getTime()));
-            orderStmt.executeUpdate();
-
-            // Get generated order ID
-            var generatedKeys = orderStmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                int orderId = generatedKeys.getInt(1);
-
-                // Insert cart items
-                try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
-                    for (CartItem item : order.getCartItems()) {
-                        cartItemStmt.setInt(1, orderId);
-                        cartItemStmt.setInt(2, item.getProduct().getId());
-                        cartItemStmt.setInt(3, item.getQuantity());
-                        cartItemStmt.setInt(4, item.getTotalPrice());
-                        cartItemStmt.addBatch();
-                    }
-                    cartItemStmt.executeBatch();
-                }
-                return true;
+            // Save order
+            try (PreparedStatement orderStatement = connection.prepareStatement(INSERT_ORDER_SQL)) {
+                orderStatement.setInt(1, order.getUserId());
+                orderStatement.setInt(2, order.getTotalAmount());
+                orderStatement.setTimestamp(3, new java.sql.Timestamp(order.getOrderDate().getTime()));
+                orderStatement.executeUpdate();
             }
-        }
-        return false;
-    }
 
-    // Lấy tất cả đơn hàng với trạng thái 'Pending'
-    public List<Orders> getAllOrders() throws SQLException {
-        List<Orders> orders = new ArrayList<>();
-        String orderSQL = "SELECT * FROM orders";
-        String cartItemSQL = "SELECT * FROM cart_items WHERE Order_ID = ?";
-
-        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL);
-             ResultSet orderRs = orderStmt.executeQuery()) {
-
-            // Duyệt qua tất cả các đơn hàng
-            while (orderRs.next()) {
-                int orderId = orderRs.getInt("Order_ID");
-                int userId = orderRs.getInt("User_ID");
-                int totalAmount = orderRs.getInt("total_amount");
-                Timestamp orderDate = orderRs.getTimestamp("order_date");
-
-                // Tạo đối tượng Order và thêm vào danh sách
-                Orders order = new Orders(orderId, userId, totalAmount, orderDate);
-
-                // Lấy các cart items tương ứng với đơn hàng
-                try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
-                    cartItemStmt.setInt(1, orderId);
-                    try (ResultSet cartItemRs = cartItemStmt.executeQuery()) {
-                        List<CartItem> cartItems = new ArrayList<>();
-
-                        while (cartItemRs.next()) {
-                            int productId = cartItemRs.getInt("P_ID");
-                            int quantity = cartItemRs.getInt("quantity");
-                            int totalPrice = cartItemRs.getInt("total_price");
-
-                            // Tạo đối tượng CartItem và thêm vào danh sách
-                            Products product = new Products(productId); // Giả sử Product chỉ cần ID, bạn có thể thêm chi tiết sản phẩm nếu cần
-                            CartItem cartItem = new CartItem(product, quantity);
-                            cartItems.add(cartItem);
-                        }
-
-                        order.setCartItems(cartItems); // Thiết lập cart items cho đơn hàng
-                    }
-                }
-
-                orders.add(order); // Thêm đơn hàng vào danh sách
-            }
-        }
-        return orders;
-    }
-    public Orders getOrderById(int orderId) throws SQLException {
-        String orderSQL = "SELECT * FROM orders WHERE Order_ID = ?";
-        String cartItemSQL = "SELECT * FROM cart_items WHERE Order_ID = ?";
-
-        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL)) {
-            orderStmt.setInt(1, orderId);
-            try (ResultSet orderRs = orderStmt.executeQuery()) {
-                if (orderRs.next()) {
-                    int userId = orderRs.getInt("User_ID");
-                    int totalAmount = orderRs.getInt("total_amount");
-                    Timestamp orderDate = orderRs.getTimestamp("order_date");
-
-                    Orders order = new Orders(orderId, userId, totalAmount, orderDate);
-
-                    try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
-                        cartItemStmt.setInt(1, orderId);
-                        try (ResultSet cartItemRs = cartItemStmt.executeQuery()) {
-                            List<CartItem> cartItems = new ArrayList<>();
-                            while (cartItemRs.next()) {
-                                int productId = cartItemRs.getInt("P_ID");
-                                int quantity = cartItemRs.getInt("quantity");
-                                int totalPrice = cartItemRs.getInt("total_price");
-
-                                Products product = new Products(productId); // Chỉ sử dụng ID, hoặc thêm chi tiết nếu cần
-                                CartItem cartItem = new CartItem(product, quantity);
-                                cartItems.add(cartItem);
-                            }
-                            order.setCartItems(cartItems);
-                        }
-                    }
-                    return order;
+            // Save cart items
+            for (CartItem item : order.getCartItems()) {
+                try (PreparedStatement cartItemStatement = connection.prepareStatement(INSERT_CART_ITEM_SQL)) {
+                    cartItemStatement.setInt(1, order.getOrderId()); // Assuming orderId is auto-generated and assigned
+                    cartItemStatement.setInt(2, item.getProduct().getId());
+                    cartItemStatement.setInt(3, item.getQuantity());
+                    cartItemStatement.setInt(4, item.getTotalPrice());
+                    cartItemStatement.executeUpdate();
                 }
             }
-        }
-        return null; // Không tìm thấy đơn hàng
-    }
-    public List<Orders> getOrdersByUserId(int userId) throws SQLException {
-        List<Orders> orders = new ArrayList<>();
-        String orderSQL = "SELECT * FROM orders WHERE User_ID = ?";
-        String cartItemSQL = "SELECT * FROM cart_items WHERE Order_ID = ?";
 
-        try (PreparedStatement orderStmt = connection.prepareStatement(orderSQL)) {
-            orderStmt.setInt(1, userId);
-            try (ResultSet orderRs = orderStmt.executeQuery()) {
-                while (orderRs.next()) {
-                    int orderId = orderRs.getInt("Order_ID");
-                    int totalAmount = orderRs.getInt("total_amount");
-                    Timestamp orderDate = orderRs.getTimestamp("order_date");
-
-                    Orders order = new Orders(orderId, userId, totalAmount, orderDate);
-
-                    try (PreparedStatement cartItemStmt = connection.prepareStatement(cartItemSQL)) {
-                        cartItemStmt.setInt(1, orderId);
-                        try (ResultSet cartItemRs = cartItemStmt.executeQuery()) {
-                            List<CartItem> cartItems = new ArrayList<>();
-                            while (cartItemRs.next()) {
-                                int productId = cartItemRs.getInt("P_ID");
-                                int quantity = cartItemRs.getInt("quantity");
-                                int totalPrice = cartItemRs.getInt("total_price");
-
-                                Products product = new Products(productId);
-                                CartItem cartItem = new CartItem(product, quantity);
-                                cartItems.add(cartItem);
-                            }
-                            order.setCartItems(cartItems);
-                        }
-                    }
-                    orders.add(order);
-                }
-            }
-        }
-        return orders;
-    }
-    public boolean deleteOrder(int orderId) throws SQLException {
-        String deleteCartItems = "DELETE FROM cart_items WHERE Order_ID = ?";
-        String deleteOrder = "DELETE FROM orders WHERE Order_ID = ?";
-
-        try (PreparedStatement stmt1 = connection.prepareStatement(deleteCartItems);
-             PreparedStatement stmt2 = connection.prepareStatement(deleteOrder)) {
-            stmt1.setInt(1, orderId);
-            stmt1.executeUpdate();
-
-            stmt2.setInt(1, orderId);
-            return stmt2.executeUpdate() > 0;
+            // Commit transaction
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
-    public List<Orders> getOrdersByDateRange(Date startDate, Date endDate) throws SQLException {
-        List<Orders> orders = new ArrayList<>();
-        String sql = "SELECT * FROM orders WHERE order_date BETWEEN ? AND ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setDate(1, new java.sql.Date(startDate.getTime()));
-            stmt.setDate(2, new java.sql.Date(endDate.getTime()));
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    int orderId = rs.getInt("Order_ID");
-                    int userId = rs.getInt("User_ID");
-                    int totalAmount = rs.getInt("total_amount");
-                    Timestamp orderDate = rs.getTimestamp("order_date");
-
-                    Orders order = new Orders(orderId, userId, totalAmount, orderDate);
-                    orders.add(order);
-                }
-            }
-        }
-        return orders;
-    }
-
 }

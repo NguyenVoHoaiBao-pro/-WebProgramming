@@ -4,8 +4,9 @@ import java.util.Date;
 import java.util.List;
 
 public class Orders {
-    private int orderId;                 // Mã đơn hàng
-    private int userId;                  // Mã người dùng
+    private int orderId;
+    private int userId;
+    private Users users; // Mã đơn hàng
     private List<CartItem> cartItems;    // Danh sách sản phẩm trong giỏ hàng
     private int totalAmount;             // Tổng giá trị đơn hàng
     private Date orderDate;              // Ngày đặt hàng
@@ -18,11 +19,12 @@ public class Orders {
     }
 
     // Constructor
-    public Orders(int orderId, int userId, int cartItems, Date orderDate) {
+    public Orders(int orderId, Users users, List<CartItem> cartItems, int totalAmount, Date orderDate) {
         this.orderId = orderId;
-        this.userId = userId;
+        this.users = users;
+        this.cartItems = cartItems;
+        this.totalAmount = totalAmount;
         this.orderDate = orderDate;
-        this.totalAmount = calculateTotalAmount(); // Tự động tính tổng giá trị
     }
 
     // Getters và Setters
