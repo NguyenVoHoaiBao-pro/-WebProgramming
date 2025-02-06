@@ -1,48 +1,84 @@
-<%@ page import="entity.Orders, entity.Users" %><%@ page import="com.google.gson.Gson"%>
-<%@ page contentType="application/json" pageEncoding="UTF-8" %>
-<%@ page import="dao.dao, entity.Products, entity.Categories" %>
-<%@ page import="java.util.List" %>
-<%@ page import="entity.Orders" %>
-<%@ page import="entity.Users" %>
-<%@ page import="entity.CartItem" %>
-<%@ page import="java.math.BigDecimal" %>
-<%@ page import="dao.OrderDao" %>
-<%@ page import="java.sql.Connection" %>
-<%@ page import="java.sql.DriverManager" %>
-<%@ page import="com.google.gson.Gson" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Đơn hàng</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
 
-<%
-    String orderJson = request.getParameter("order");
-    String userJson = request.getParameter("user");
+<h2>Danh sách đơn hàng</h2>
 
-    // Optionally, use Gson to deserialize the JSON data into objects
-    Gson gson = new Gson();
-    Orders order = gson.fromJson(orderJson, Orders.class);
-    Users user = gson.fromJson(userJson, Users.class);
-%>
+<button onclick="loadOrders()">Tải đơn hàng</button>
 
-<h1>Order Details</h1>
-<p>User: ${user.name}</p>
-<p>Order ID: ${order.orderId}</p>
-<p>Total Amount: ${order.totalAmount}</p>
-<p>Order Date: ${order.orderDate}</p>
-
-<h2>Cart Items</h2>
 <table>
-<thead>
-<tr>
-<th>Product Name</th>
-<th>Quantity</th>
-<th>Total Price</th>
-</tr>
-</thead>
-<tbody>
-<c:forEach var="item" items="${order.cartItems}">
-<tr>
-<td>${item.product.name}</td>
-<td>${item.quantity}</td>
-<td>${item.totalPrice}K</td>
-</tr>
-</c:forEach>
-</tbody>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Khách hàng</th>
+        <th>Sản phẩm</th>
+        <th>Tổng tiền</th>
+        <th>Ngày đặt</th>
+    </tr>
+    </thead>
+    <tbody id="orderTableBody">
+    <!-- Dữ liệu JSON sẽ được hiển thị ở đây -->
+    </tbody>
 </table>
+
+<script>
+    function loadOrders() {
+        $.ajax({
+            url: "/processOrder",
+            type: "POST",
+            contentType: "application/json",
+            success: function(response) {
+                if (response.error) {
+                    alert(response.error);
+                    return;
+                }
+
+                let order = response.order;
+                let user = response.user;
+                let cartItems = order.cartItems;
+
+                let orderRow = `<tr>
+                        <td>${order.orderId}</td>
+                        <td>${user.name} (${user.email})</td>
+                        <td>${cartItems.map(item => item.product.name + " x " + item.quantity).join(", ")}</td>
+                        <td>${order.totalAmount}</td>
+                        <td>${new Date(order.orderDate).toLocaleString()}</td>
+                    </tr>`;
+
+                $("#orderTableBody").append(orderRow);
+            },
+            error: function() {
+                alert("Lỗi khi tải dữ liệu!");
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -331,30 +331,7 @@
         </form>
 
 
-        <script>
-          document.getElementById("checkout-button").addEventListener("click", function () {
-            fetch("/process-order", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              }
-            })
-                    .then(response => {
-                      if (response.ok) return response.json();
-                      throw new Error("Failed to process order");
-                    })
-                    .then(order => {
-                      console.log("Order sent to admin:", order);
-                      alert("Order processed successfully!");
-                      window.location.href = "/path/to/ad.jsp"; // Chuyển đến ad.jsp
-                    })
-                    .catch(error => {
-                      console.error(error);
-                      alert("Failed to process order. Try again.");
-                    });
-          });
 
-        </script>
       </div>
     </div>
   </div>
